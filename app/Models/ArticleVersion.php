@@ -10,6 +10,9 @@ class ArticleVersion extends Model
     use HasFactory;
 
     protected $fillable = [
+        'article_id',
+        'content',
+        'version',
     ];
 
     public function article()

@@ -22,6 +22,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('articles/{article}', [ArticleController::class, 'update'])->middleware('can:manage articles');
     Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->middleware('can:manage articles');
     Route::post('articles/{article}/comments', [CommentController::class, 'store']);
+    Route::get('articles/{article}/history', [ArticleController::class, 'history']);
+    Route::post('articles/{article}/restore/{versionId}', [ArticleController::class, 'restoreVersion']);
+
     Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->middleware('can:manage comments');
 
 

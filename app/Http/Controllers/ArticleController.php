@@ -90,6 +90,52 @@ class ArticleController extends Controller
     }
 
     /**
+     * Search a specific article.
+     */
+    public function search(Request $request)
+    {
+        // Extract the 'query' parameter
+        $query = $request->input('query');
+        $category = $request->input('category');
+        $dateFrom = $request->input('date_from');
+        $dateTo = $request->input('date_to');
+
+        // Validation of required fields
+        if (!$query) {
+            return response()->json(['message' => 'Query parameter is required'], 400);
+        }
+
+        // Start the article query builder
+        $articles = Article::query();
+
+        // Search by title or content
+        $articles->where(function ($q) use ($query) {
+            $q->where('title', 'like', "%{$query}%")
+                ->orWhere('content', 'like', "%{$query}%");
+        });
+
+        // Filter by category if provided
+        if ($category) {
+            $articles->where('category_id', $category);
+        }
+
+        // Filter by date range if provided
+        if ($dateFrom) {
+            $articles->whereDate('created_at', '>=', $dateFrom);
+        }
+
+        if ($dateTo) {
+            $articles->whereDate('created_at', '<=', $dateTo);
+        }
+
+        // Get the results
+        $results = $articles->get();
+
+        // Return the results as a JSON response
+        return response()->json($results, 200);
+    }
+
+    /**
      * Remove the specified resource from storage.
      */
     public function destroy(Article $article)

@@ -7,6 +7,7 @@ use App\Models\Article;
 
 class ArticleController extends Controller
 {
+
     /**
      * Display a listing of the resource.
      */
@@ -20,6 +21,10 @@ class ArticleController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->user()->can('manage articles')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $data = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
@@ -45,6 +50,10 @@ class ArticleController extends Controller
      */
     public function update(Request $request, Article $article)
     {
+        if (!auth()->user()->can('manage articles')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'title' => 'string|max:255',
             'content' => 'string',
@@ -61,6 +70,10 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        if (!auth()->user()->can('manage articles')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $article->delete();
 
         return response()->json(null, 204);

@@ -20,6 +20,10 @@ class CategoryController extends Controller
      */
     public function store(Request $request)
     {
+        if (!auth()->user()->can('manage categories')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'required|string|max:255',
@@ -48,6 +52,10 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
+        if (!auth()->user()->can('manage categories')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $request->validate([
             'name' => 'string|max:255',
             'description' => 'nullable|string',
@@ -64,6 +72,10 @@ class CategoryController extends Controller
      */
     public function destroy(Category $category)
     {
+        if (!auth()->user()->can('manage categories')) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
         $category->delete();
 
         return response()->json(null, 204);

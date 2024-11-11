@@ -13,7 +13,12 @@ class Notification extends Model
         'user_id',
         'type',
         'message',
+        'data',
         'is_read',
+    ];
+
+    protected $casts = [
+        'data' => 'array',
     ];
 
     public function user(){

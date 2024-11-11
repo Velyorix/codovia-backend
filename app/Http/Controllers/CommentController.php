@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\CommentAdded;
 use Illuminate\Http\Request;
 use App\Models\Comment;
 use App\Models\Article;
@@ -22,6 +23,8 @@ class CommentController extends Controller
             'content' => $request->content,
             'user_id' => auth()->id(),
         ]);
+
+        event(new CommentAdded($comment));
 
         return response()->json($comment, 201);
     }

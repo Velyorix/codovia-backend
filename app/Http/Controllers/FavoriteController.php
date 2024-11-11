@@ -12,14 +12,14 @@ class FavoriteController extends Controller
         $user = auth()->user();
 
         if ($user->favorites()->where('article_id', $article->id)->exists()) {
-            return response()->json(['message' => 'Already in favorites'], 409);
+            return response()->json(['message' => 'Article already in favorites'], 409);
         }
 
         $favorite = Favorite::create([
             'user_id' => $user->id,
             'article_id' => $article->id,
         ]);
-        return response()->json($favorite, 201);
+        return response()->json(['message' => 'Article added to favorites successfully'], 201);
     }
 
     public function destroy(Request $request, Article $article){
@@ -30,12 +30,12 @@ class FavoriteController extends Controller
             ->first();
 
         if (!$favorite) {
-            return response()->json(['message' => 'Not in favorites'], 404);
+            return response()->json(['message' => 'Article not found in favorites'], 404);
         }
 
         $favorite->delete();
 
-        return response()->json(null, 204);
+        return response()->json(['message' => 'Article removed from favorites'], 200);
     }
 
     public function index(){

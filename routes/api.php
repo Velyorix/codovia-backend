@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
@@ -23,6 +24,7 @@ Route::get('categories/{category}', [CategoryController::class, 'show']);
 
 Route::get('/articles/{article}/ratings', [RatingController::class, 'getRatings']);
 
+Route::get('tags', [TagController::class, 'index']);
 
 Route::middleware(['auth:api'])->group(function () {
     Route::post('articles', [ArticleController::class, 'store'])->middleware('can:manage articles');
@@ -43,5 +45,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/favorites', [FavoriteController::class, 'index']);
     Route::post('/articles/{article}/favorite', [FavoriteController::class, 'store']);
     Route::delete('/articles/{article}/favorite', [FavoriteController::class, 'destroy']);
+
+    Route::post('tags', [TagController::class, 'store'])->middleware(['can:manage tags']);
+    Route::delete('tags/{tag}', [TagController::class, 'destroy'])->middleware(['can:manage tags']);
+    Route::post('articles/{article}/tags', [ArticleController::class, 'attachTags'])->middleware(['can:manage tags']);
+    Route::delete('articles/{article}/tags', [ArticleController::class, 'detachTags'])->middleware(['can:manage tags']);
 
 });

@@ -52,6 +52,7 @@ class Article extends Model
             'category_id' => $this->category_id,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,
+            'tags' => $this->tags->pluck('name')->toArray(),
         ];
     }
 
@@ -73,5 +74,10 @@ class Article extends Model
     public function averageRating()
     {
         return $this->ratings()->avg('rating');
+    }
+
+    public function tags()
+    {
+        return $this->belongsToMany(Tag::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\ArticleVersion;
+use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Article;
@@ -55,7 +56,7 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        return $article;
+        return $article->load('tags');
     }
 
     /**
@@ -166,5 +167,20 @@ class ArticleController extends Controller
         }
 
         return response()->json(null, 204);
+    }
+
+    public function attachTags(Request $request, Article $article){
+        $request->validate(['tags' => 'array']);
+        $tags = Tag::whereIn('id', $request->tags)->pluck('id');
+        $article->tags()->sync($tags);
+        return response()->json(['message' => 'Tags successfully associated with the article.'], 200);
+    }
+
+    public function detachTags(Request $request, Article $article){
+        $request->validate(['tags' => 'array']);
+        $tags = Tag::whereIn('id', $request->tags)->pluck('id');
+        $article->tags()->detach($tags);
+
+        return response()->json(['message' => 'Tags successfully detached from the article.'], 200);
     }
 }

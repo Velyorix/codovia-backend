@@ -19,7 +19,7 @@ The backend of TechPedia handles the business logic and data management for:
 - **Markdown support** for articles with syntax highlighting
 - **Real-time notifications** for article updates, new articles, and comments
 - **Version control** for articles: Automatically saves previous versions of articles on updates, with the ability to restore a specific version
-- **Advanced search** functionality with filters for categories, date ranges, and keyword matching
+- **Advanced search** functionality with Meilisearch, allowing filters for categories, date ranges, and keyword matching
 
 ## Tech Stack
 
@@ -27,7 +27,7 @@ The backend of TechPedia handles the business logic and data management for:
 - **Framework**: Laravel
 - **Database**: MySQL or MongoDB (configurable)
 - **Authentication**: Laravel Passport (OAuth 2.0)
-- **Search**: Elasticsearch or Algolia (for advanced search functionalities)
+- **Search**: Meilisearch for advanced search functionalities
 - **API Documentation**: OpenAPI/Swagger (optional)
 - **Notifications**: Custom notification system for real-time user alerts
 
@@ -75,10 +75,36 @@ To set up the backend environment locally, follow these steps:
 
 ## Configuration
 
-- **Database**: Configure your database connection in the `.env` file. Default settings are for MySQL.
-- **OAuth Configuration**: Passport is used for authentication. Make sure to configure Passport correctly and run `php artisan passport:install` to set up OAuth clients.
-- **Search Configuration**: If using Elasticsearch or Algolia, set up the connection settings in `.env`.
-- **Notifications**: The notification system will trigger events on article creation, updates, and deletions. Ensure database settings are configured for optimal performance.
+### Database
+Configure your database connection in the `.env` file. Default settings are for MySQL.
+
+### OAuth Configuration
+Passport is used for authentication. Ensure Passport is correctly configured and run `php artisan passport:install` to set up OAuth clients.
+
+### Meilisearch Configuration
+TechPedia's search functionality is powered by Meilisearch. To enable Meilisearch, follow these steps:
+
+1. **Install and Run Meilisearch**: Install Meilisearch on your server or use a hosted instance.
+2. **Set Environment Variables**:
+    - In the `.env` file, add the following:
+      ```env
+      SCOUT_DRIVER=meilisearch
+      MEILISEARCH_HOST=https://your-meilisearch-domain.com
+      MEILISEARCH_KEY=your_public_search_key
+      MEILISEARCH_ADMIN_KEY=your_admin_key
+      ```
+    - Replace `your-meilisearch-domain.com` with your Meilisearch server's URL and provide the appropriate keys.
+3. **Customize Scout Configuration**:
+    - Open `config/scout.php` and ensure Meilisearch settings are configured as needed. You can define index-specific settings, such as `filterableAttributes` and `sortableAttributes`, which allow for efficient filtering and sorting.
+4. **Sync Data with Meilisearch**:
+    - To index existing data, run:
+      ```bash
+      php artisan scout:import "App\Models\Article"
+      ```
+    - This command will sync all articles with Meilisearch for instant searchability.
+
+### Notifications
+The notification system will trigger events on article creation, updates, and deletions. Ensure database settings are configured for optimal performance.
 
 ## Endpoints
 

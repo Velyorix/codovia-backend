@@ -4,6 +4,9 @@ namespace App\Providers;
 
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\ServiceProvider;
+use Elastic\Elasticsearch\ClientBuilder;
+use Elastic\Transport\NodePool\StaticNoPingNodePool;
+use Elastic\Transport\NodePool\NodePoolInterface;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -12,7 +15,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        $this->app->bind(NodePoolInterface::class, function () {
+            return new StaticNoPingNodePool([]);
+        });
+
+        $this->app->singleton('elasticsearch', function () {
+            return ClientBuilder::create()
+                ->setHosts([config('scout.elasticsearch.hosts')])
+                ->build();
+        });
     }
 
     /**

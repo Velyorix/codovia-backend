@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Laravel\Scout\Searchable;
+
 
 class Article extends Model
 {
-    use HasFactory;
+    use HasFactory, Searchable;
 
     protected $fillable = [
         'title',
@@ -39,5 +41,17 @@ class Article extends Model
     public function comments()
     {
         return $this->hasMany(Comment::class);
+    }
+
+    // Configure les champs indexés pour la recherche
+    public function toSearchableArray()
+    {
+        return [
+            'title' => $this->title,
+            'content' => $this->content,
+            'category_id' => $this->category_id,
+            'user_id' => $this->user_id,
+            'created_at' => $this->created_at,
+        ];
     }
 }

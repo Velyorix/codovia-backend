@@ -123,29 +123,23 @@ class ArticleController extends Controller
             return response()->json(['message' => 'Query parameter is required'], 400);
         }
 
-        $articles = Article::query();
-
-        $articles->where(function ($q) use ($query) {
-            $q->where('title', 'like', "%{$query}%")
-                ->orWhere('content', 'like', "%{$query}%");
-        });
+        $articles = Article::search($query)->get();
 
         if ($category) {
-            $articles->where('category_id', $category);
+            $articles = $articles->where('category_id', $category);
         }
 
         if ($dateFrom) {
-            $articles->whereDate('created_at', '>=', $dateFrom);
+            $articles = $articles->where('created_at', '>=', $dateFrom);
         }
 
         if ($dateTo) {
-            $articles->whereDate('created_at', '<=', $dateTo);
+            $articles = $articles->where('created_at', '<=', $dateTo);
         }
 
-        $results = $articles->get();
-
-        return response()->json($results, 200);
+        return response()->json($articles, 200);
     }
+
 
     /**
      * Remove the specified resource from storage.

@@ -160,6 +160,7 @@ Below are some of the main API endpoints:
 - **Notifications**:
     - `GET /api/notifications` - Retrieve notifications for the authenticated user
     - `POST /api/notifications/{notification}/mark-as-read` - Mark a notification as read
+    - `DELETE /api/notifications/{notification}` - Delete a specific notification for an authenticated user
 
 ## License
 

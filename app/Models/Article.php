@@ -80,4 +80,9 @@ class Article extends Model
     {
         return $this->belongsToMany(Tag::class);
     }
+
+    public function readingProgress()
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
 }

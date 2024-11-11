@@ -5,6 +5,7 @@ use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\RatingController;
+use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -51,4 +52,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('articles/{article}/tags', [ArticleController::class, 'attachTags'])->middleware(['can:manage tags']);
     Route::delete('articles/{article}/tags', [ArticleController::class, 'detachTags'])->middleware(['can:manage tags']);
 
+    Route::post('articles/{article}/progress', [ReadingProgressController::class, 'updateProgress']);
+    Route::get('articles/{article}/progress', [ReadingProgressController::class, 'showProgress']);
+    Route::get('reading-history', [ReadingProgressController::class, 'history']);
 });

@@ -67,4 +67,9 @@ class User extends Authenticatable
     {
         return $this->hasMany(Rating::class);
     }
+
+    public function readingProgress()
+    {
+        return $this->hasMany(ReadingProgress::class);
+    }
 }

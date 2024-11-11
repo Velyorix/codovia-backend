@@ -20,6 +20,7 @@ The backend of TechPedia handles the business logic and data management for:
 - **Real-time notifications** for article updates, new articles, and comments
 - **Version control** for articles: Automatically saves previous versions of articles on updates, with the ability to restore a specific version
 - **Advanced search** functionality with Meilisearch, allowing filters for categories, date ranges, and keyword matching
+- **Pagination** for listing resources with customizable items per page
 
 ## Tech Stack
 
@@ -115,19 +116,24 @@ Below are some of the main API endpoints:
     - `POST /login` - Login and obtain an access token
 
 - **Articles**:
-    - `GET /api/articles` - Retrieve a list of all articles
+    - `GET /api/articles?per_page={number}` - Retrieve a paginated list of all articles (default 10 per page, customizable with `per_page` parameter)
     - `POST /api/articles` - Create a new article (admin/editor only)
     - `PUT /api/articles/{article}` - Update an article with version control (admin/editor only)
     - `DELETE /api/articles/{article}` - Delete an article (admin only)
     - `GET /api/articles/{article}/history` - View article version history
     - `POST /api/articles/{article}/restore/{versionId}` - Restore a specific version of an article
-    - `GET /api/articles/search?query=your_query` - Search for articles with optional filters (category, date range, etc.)
+    - `GET /api/articles/search?query=your_query&category={category_id}&date_from={start_date}&date_to={end_date}&per_page={number}` - Search for articles with optional filters (category, date range, etc.) and pagination support
 
 - **Categories**:
-    - `GET /api/categories` - Retrieve all categories
+    - `GET /api/categories?per_page={number}` - Retrieve a paginated list of all categories (default 10 per page)
     - `POST /api/categories` - Create a new category (admin only)
     - `PUT /api/categories/{category}` - Update a category (admin only)
     - `DELETE /api/categories/{category}` - Delete a category (admin only)
+
+- **Comments**:
+    - `GET /api/articles/{article}/comments?per_page={number}` - Retrieve a paginated list of comments for a specific article (default 10 per page)
+    - `POST /api/articles/{article}/comments` - Create a new comment for a specific article (authenticated users only)
+    - `DELETE /api/comments/{comment}` - Delete a comment (authorized users only: the comment owner or users with comment management permissions)
 
 - **Notifications**:
     - `GET /api/notifications` - Retrieve notifications for the authenticated user

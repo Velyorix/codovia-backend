@@ -7,6 +7,7 @@ use App\Http\Controllers\FavoriteController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReadingProgressController;
+use App\Http\Controllers\SanctionController;
 use App\Http\Controllers\TagController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
@@ -60,4 +61,14 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/notifications', [NotificationController::class, 'index']);
     Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead']);
     Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
+
+    Route::post('/comments/{comment}/report', [CommentController::class, 'report']);
+    Route::get('/admin/reports', [CommentController::class, 'reviewReports'])->middleware('can:manage reports');
+    Route::post('/admin/reports/{report}/resolve', [CommentController::class, 'resolveReport'])->middleware('can:manage reports');
+
+    Route::get('/admin/sanctions', [SanctionController::class, 'index'])->middleware('can:manage sanctions');
+    Route::post('/admin/users/{user}/sanctions', [SanctionController::class, 'store'])->middleware('can:manage sanctions');
+    Route::put('/admin/sanctions/{sanction}', [SanctionController::class, 'update'])->middleware('can:manage sanctions');
+    Route::delete('/admin/sanctions/{sanction}', [SanctionController::class, 'destroy'])->middleware('can:manage sanctions');
+    Route::get('/admin/users/{user}/sanction-status', [SanctionController::class, 'checkSanctionStatus']);
 });

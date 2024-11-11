@@ -38,9 +38,10 @@ class FavoriteController extends Controller
         return response()->json(['message' => 'Article removed from favorites'], 200);
     }
 
-    public function index(){
+    public function index(Request $request){
         $user = auth()->user();
-        $favorites = $user->favoriteArticles()->paginate(10);
+        $perPage = $request->input('per_page', 10);
+        $favorites = $user->favoriteArticles()->paginate($perPage);
 
         return response()->json($favorites);
     }

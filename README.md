@@ -22,6 +22,7 @@ The backend of TechPedia handles the business logic and data management for:
 - **Favorites functionality**: Allows users to add, remove, and list their favorite articles
 - **Ratings feature**: Allows users to rate articles and view average ratings
 - **Tags management**: Enables tagging of articles for categorization and filtering
+- **Reading Progress Tracking**: Allows users to track their reading progress on articles, including a reading history
 - **Advanced search** functionality with Meilisearch, allowing filters for categories, tags, date ranges, and keyword matching
 - **Pagination** for listing resources with customizable items per page
 
@@ -150,6 +151,11 @@ Below are some of the main API endpoints:
     - `POST /api/tags` - Create a new tag (admin only)
     - `DELETE /api/tags/{tag}` - Delete a tag (admin only)
     - `POST /api/articles/{article}/tags` - Associate tags with an article (admin only)
+
+- **Reading Progress**:
+    - `POST /api/articles/{article}/progress` - Update the reading progress of an article for an authenticated user
+    - `GET /api/articles/{article}/progress` - Retrieve the current reading progress of an article for an authenticated user
+    - `GET /api/reading-history` - Retrieve the authenticated user's reading history, showing all articles they have made progress on
 
 - **Notifications**:
     - `GET /api/notifications` - Retrieve notifications for the authenticated user

@@ -56,7 +56,7 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        return $article;
+        return $article->load('tags');
     }
 
     /**
@@ -174,5 +174,13 @@ class ArticleController extends Controller
         $tags = Tag::whereIn('id', $request->tags)->pluck('id');
         $article->tags()->sync($tags);
         return response()->json(['message' => 'Tags successfully associated with the article.'], 200);
+    }
+
+    public function detachTags(Request $request, Article $article){
+        $request->validate(['tags' => 'array']);
+        $tags = Tag::whereIn('id', $request->tags)->pluck('id');
+        $article->tags()->detach($tags);
+
+        return response()->json(['message' => 'Tags successfully detached from the article.'], 200);
     }
 }

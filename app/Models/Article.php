@@ -54,4 +54,14 @@ class Article extends Model
             'created_at' => $this->created_at,
         ];
     }
+
+    public function favorites()
+    {
+        return $this->hasMany(Favorite::class);
+    }
+
+    public function favoritedByUsers()
+    {
+        return $this->belongsToMany(User::class, 'favorites', 'article_id', 'user_id');
+    }
 }

@@ -3,6 +3,7 @@
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
+use App\Http\Controllers\FavoriteController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
@@ -33,4 +34,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('categories', [CategoryController::class, 'store'])->middleware('can:manage categories');
     Route::put('categories/{category}', [CategoryController::class, 'update'])->middleware('can:manage categories');
     Route::delete('categories/{category}', [CategoryController::class, 'destroy'])->middleware('can:manage categories');
+
+    Route::get('/favorites', [FavoriteController::class, 'index']);
+    Route::post('/articles/{article}/favorite', [FavoriteController::class, 'store']);
+    Route::delete('/articles/{article}/favorite', [FavoriteController::class, 'destroy']);
+
 });

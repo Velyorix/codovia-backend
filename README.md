@@ -19,6 +19,7 @@ The backend of TechPedia handles the business logic and data management for:
 - **Markdown support** for articles with syntax highlighting
 - **Real-time notifications** for article updates, new articles, and comments
 - **Version control** for articles: Automatically saves previous versions of articles on updates, with the ability to restore a specific version
+- **Favorites functionality**: Allows users to add, remove, and list their favorite articles
 - **Advanced search** functionality with Meilisearch, allowing filters for categories, date ranges, and keyword matching
 - **Pagination** for listing resources with customizable items per page
 
@@ -134,6 +135,11 @@ Below are some of the main API endpoints:
     - `GET /api/articles/{article}/comments?per_page={number}` - Retrieve a paginated list of comments for a specific article (default 10 per page)
     - `POST /api/articles/{article}/comments` - Create a new comment for a specific article (authenticated users only)
     - `DELETE /api/comments/{comment}` - Delete a comment (authorized users only: the comment owner or users with comment management permissions)
+
+- **Favorites**:
+    - `POST /api/articles/{article}/favorite` - Add an article to the favorites list (authenticated users only)
+    - `DELETE /api/articles/{article}/favorite` - Remove an article from the favorites list (authenticated users only)
+    - `GET /api/favorites?per_page={number}` - Retrieve a paginated list of favorite articles for the authenticated user (default 10 per page)
 
 - **Notifications**:
     - `GET /api/notifications` - Retrieve notifications for the authenticated user

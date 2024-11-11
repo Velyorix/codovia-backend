@@ -20,7 +20,9 @@ The backend of TechPedia handles the business logic and data management for:
 - **Real-time notifications** for article updates, new articles, and comments
 - **Version control** for articles: Automatically saves previous versions of articles on updates, with the ability to restore a specific version
 - **Favorites functionality**: Allows users to add, remove, and list their favorite articles
-- **Advanced search** functionality with Meilisearch, allowing filters for categories, date ranges, and keyword matching
+- **Ratings feature**: Allows users to rate articles and view average ratings
+- **Tags management**: Enables tagging of articles for categorization and filtering
+- **Advanced search** functionality with Meilisearch, allowing filters for categories, tags, date ranges, and keyword matching
 - **Pagination** for listing resources with customizable items per page
 
 ## Tech Stack
@@ -123,7 +125,9 @@ Below are some of the main API endpoints:
     - `DELETE /api/articles/{article}` - Delete an article (admin only)
     - `GET /api/articles/{article}/history` - View article version history
     - `POST /api/articles/{article}/restore/{versionId}` - Restore a specific version of an article
-    - `GET /api/articles/search?query=your_query&category={category_id}&date_from={start_date}&date_to={end_date}&per_page={number}` - Search for articles with optional filters (category, date range, etc.) and pagination support
+    - `GET /api/articles/search?query=your_query&category={category_id}&tag={tag_id}&date_from={start_date}&date_to={end_date}&per_page={number}` - Search for articles with optional filters (category, tags, date range, etc.) and pagination support
+    - `POST /api/articles/{article}/rate` - Submit a rating for an article (authenticated users only)
+    - `GET /api/articles/{article}/ratings` - Get the average rating and list of ratings for a specific article
 
 - **Categories**:
     - `GET /api/categories?per_page={number}` - Retrieve a paginated list of all categories (default 10 per page)
@@ -140,6 +144,12 @@ Below are some of the main API endpoints:
     - `POST /api/articles/{article}/favorite` - Add an article to the favorites list (authenticated users only)
     - `DELETE /api/articles/{article}/favorite` - Remove an article from the favorites list (authenticated users only)
     - `GET /api/favorites?per_page={number}` - Retrieve a paginated list of favorite articles for the authenticated user (default 10 per page)
+
+- **Tags**:
+    - `GET /api/tags` - Retrieve a list of all tags
+    - `POST /api/tags` - Create a new tag (admin only)
+    - `DELETE /api/tags/{tag}` - Delete a tag (admin only)
+    - `POST /api/articles/{article}/tags` - Associate tags with an article (admin only)
 
 - **Notifications**:
     - `GET /api/notifications` - Retrieve notifications for the authenticated user

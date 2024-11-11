@@ -64,4 +64,14 @@ class Article extends Model
     {
         return $this->belongsToMany(User::class, 'favorites', 'article_id', 'user_id');
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function averageRating()
+    {
+        return $this->ratings()->avg('rating');
+    }
 }

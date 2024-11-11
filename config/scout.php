@@ -9,7 +9,7 @@ return [
         'key' => env('MEILISEARCH_PUBLIC_KEY'),
         'index-settings' => [
             'articles' => [
-                'filterableAttributes'=> ['category_id', 'user_id'],
+                'filterableAttributes'=> ['category_id', 'user_id', 'created_at'],
                 'sortableAttributes' => ['created_at'],
             ],
         ],

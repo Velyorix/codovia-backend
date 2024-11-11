@@ -8,8 +8,9 @@ use App\Models\Article;
 
 class CommentController extends Controller
 {
-    public function index(Article $article){
-        return $article->comments()->with('user')->get();
+    public function index(Request $request, Article $article){
+        $perPage = $request->input('per_page', 10);
+        return $article->comments()->with('user')->paginate($perPage);
     }
 
     public function store(Request $request, Article $article){

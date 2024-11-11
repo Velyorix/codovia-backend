@@ -14,9 +14,10 @@ class ArticleController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Article::all();
+        $perPage = $request->input('per_page', 10);
+        return Article::paginate($perPage);
     }
 
     /**
@@ -118,12 +119,13 @@ class ArticleController extends Controller
         $category = $request->input('category');
         $dateFrom = $request->input('date_from');
         $dateTo = $request->input('date_to');
+        $perPage = $request->input('per_page', 10);
 
         if (!$query) {
             return response()->json(['message' => 'Query parameter is required'], 400);
         }
 
-        $articles = Article::search($query)->get();
+        $articles = Article::search($query);
 
         if ($category) {
             $articles = $articles->where('category_id', $category);
@@ -137,7 +139,9 @@ class ArticleController extends Controller
             $articles = $articles->where('created_at', '<=', $dateTo);
         }
 
-        return response()->json($articles, 200);
+        $results = $articles->paginate($perPage);
+
+        return response()->json($results, 200);
     }
 
 

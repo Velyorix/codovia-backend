@@ -10,9 +10,10 @@ class CategoryController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Category::with('children')->get();
+        $perPage = $request->input('per_page', 10);
+        return Category::with('children')->paginate($perPage);
     }
 
     /**

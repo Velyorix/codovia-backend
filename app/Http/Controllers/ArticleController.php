@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ArticleCreated;
+use App\Events\ArticleDeleted;
+use App\Events\ArticleUpdated;
 use App\Models\ArticleVersion;
 use App\Models\Tag;
 use App\Models\User;
@@ -39,14 +42,7 @@ class ArticleController extends Controller
 
         $article = Article::create($data);
 
-        $users = User::all();
-        foreach ($users as $user) {
-            Notification::create([
-                'user_id' => $user->id,
-                'type' => 'new_article',
-                'message' => "A new article titled '{$article->title}' has been published.",
-            ]);
-        }
+        event(new ArticleCreated($article));
 
         return response()->json($article, 201);
     }
@@ -81,14 +77,7 @@ class ArticleController extends Controller
 
         $article->update($data);
 
-        $users = User::all();
-        foreach ($users as $user) {
-            Notification::create([
-                'user_id' => $user->id,
-                'type' => 'updated_article',
-                'message' => "The article titled '{$article->title}' has been updated.",
-            ]);
-        }
+        event(new ArticleUpdated($article));
 
         return response()->json($article, 200);
     }
@@ -157,14 +146,7 @@ class ArticleController extends Controller
 
         $article->delete();
 
-        $users = User::all();
-        foreach ($users as $user) {
-            Notification::create([
-                'user_id' => $user->id,
-                'type' => 'deleted_article',
-                'message' => "The article titled '{$article->title}' has been deleted.",
-            ]);
-        }
+        event(new ArticleDeleted($article));
 
         return response()->json(null, 204);
     }

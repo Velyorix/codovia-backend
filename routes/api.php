@@ -4,6 +4,7 @@ use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReadingProgressController;
 use App\Http\Controllers\TagController;
@@ -55,4 +56,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('articles/{article}/progress', [ReadingProgressController::class, 'updateProgress']);
     Route::get('articles/{article}/progress', [ReadingProgressController::class, 'showProgress']);
     Route::get('reading-history', [ReadingProgressController::class, 'history']);
+
+    Route::get('/notifications', [NotificationController::class, 'index']);
+    Route::post('/notifications/{notification}/mark-as-read', [NotificationController::class, 'markAsRead']);
+    Route::delete('/notifications/{notification}', [NotificationController::class, 'destroy']);
 });

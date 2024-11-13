@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\UserSanctioned;
 use App\Models\Sanction;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -28,6 +29,8 @@ class SanctionController extends Controller
             if ($data['sanction_type'] === 'ban') {
                 $user->update(['status' => 'banned']);
             }
+
+            event(new UserSanctioned($sanction));
 
             return response()->json($sanction, 200);
         } catch (ModelNotFoundException $e) {

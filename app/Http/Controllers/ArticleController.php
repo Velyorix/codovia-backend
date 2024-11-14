@@ -6,6 +6,7 @@ use App\Events\ArticleCreated;
 use App\Events\ArticleDeleted;
 use App\Events\ArticleUpdated;
 use App\Models\ArticleVersion;
+use App\Models\ModerationHistory;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,12 +17,29 @@ class ArticleController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the public resource.
      */
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        return Article::paginate($perPage);
+        $query = Article::query()->where('status', 'public');
+
+        return $query->paginate($perPage);
+    }
+
+    /**
+     * Display a listing of the review resource.
+     */
+    public function listUnderReview(Request $request)
+    {
+        if (!auth('api')->check() || !auth('api')->user()->can('manage articles')) {
+            return response()->json(['message' => 'Unauthorized - Insufficient Permissions'], 403);
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $query = Article::query()->where('status', 'under_review');
+
+        return $query->paginate($perPage);
     }
 
     /**
@@ -40,7 +58,16 @@ class ArticleController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
+        $data['status'] = 'under_review';
+
         $article = Article::create($data);
+
+        ModerationHistory::create([
+            'moderator_id' => auth()->id(),
+            'user_id' => $article->user_id,
+            'action' => 'Article created and flagged for review',
+            'details' => "Article ID {$article->id} created and flagged for review.",
+        ]);
 
         event(new ArticleCreated($article));
 
@@ -52,6 +79,12 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
+        if ($article->status === 'under_review') {
+            if (!auth('api')->check() || !auth('api')->user()->can('manage articles')) {
+                return response()->json(['message' => 'Unauthorized - Insufficient Permissions'], 403);
+            }
+        }
+
         return $article->load('tags');
     }
 

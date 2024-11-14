@@ -1,9 +1,11 @@
 <?php
 
 use App\Http\Controllers\ArticleController;
+use App\Http\Controllers\ArticleReportController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteController;
+use App\Http\Controllers\ModerationHistoryController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\RatingController;
 use App\Http\Controllers\ReadingProgressController;
@@ -35,7 +37,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('articles/{article}', [ArticleController::class, 'destroy'])->middleware('can:manage articles');
     Route::post('articles/{article}/comments', [CommentController::class, 'store']);
     Route::get('articles/{article}/history', [ArticleController::class, 'history']);
-    Route::post('articles/{article}/restore/{versionId}', [ArticleController::class, 'restoreVersion']);
+    Route::post('articles/{article}/restore/{versionId}', [ArticleController::class, 'restoreVersion'])->middleware('can:manage articles');
     Route::post('/articles/{article}/rate', [RatingController::class, 'rate']);
 
     Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->middleware('can:manage comments');
@@ -71,4 +73,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('/admin/sanctions/{sanction}', [SanctionController::class, 'update'])->middleware('can:manage sanctions');
     Route::delete('/admin/sanctions/{sanction}', [SanctionController::class, 'destroy'])->middleware('can:manage sanctions');
     Route::get('/admin/users/{user}/sanction-status', [SanctionController::class, 'checkSanctionStatus']);
+
+    Route::post('/articles/{article}/flag', [ArticleReportController::class, 'report'])->middleware('can:manage articles');
+    Route::get('/admin/articles/reports', [ArticleReportController::class, 'review'])->middleware('can:manage articles');
+    Route::post('/admin/articles/{article}/resolve', [ArticleReportController::class, 'resolve'])->middleware('can:manage articles');
+    Route::get('admin/articles/under_review', [ArticleController::class, 'listUnderReview'])->middleware(['can:manage articles']);
+
+    Route::get('/admin/moderation-history', [ModerationHistoryController::class, 'index'])->middleware('can:manage moderation history');
 });

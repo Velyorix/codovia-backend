@@ -81,4 +81,14 @@ class CategoryController extends Controller
 
         return response()->json(null, 204);
     }
+
+    public function getSubCategory(Request $request, Category $category){
+        $perPage = $request->input('per_page', 10);
+
+        return response()->json([
+            'success' => true,
+            'data' => $category->children()->paginate($perPage),
+            'message' => 'SubCategory retrieved successfully'
+        ], 200);
+    }
 }

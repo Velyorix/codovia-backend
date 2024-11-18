@@ -6,6 +6,7 @@ use App\Events\ArticleCreated;
 use App\Events\ArticleDeleted;
 use App\Events\ArticleUpdated;
 use App\Models\ArticleVersion;
+use App\Models\ModerationHistory;
 use App\Models\Tag;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -16,12 +17,42 @@ class ArticleController extends Controller
 {
 
     /**
-     * Display a listing of the resource.
+     * Display a listing of the public resource.
      */
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        return Article::paginate($perPage);
+        $articles = Article::where('status', 'public')
+            ->with(['user:id,name', 'category:id,name', 'tags:id,name'])
+            ->paginate($perPage);
+
+        return response()->json($articles, 200);
+    }
+
+    /**
+     * Display a listing of the review resource.
+     */
+    public function listUnderReview(Request $request)
+    {
+        if (!auth('api')->check() || !auth('api')->user()->can('manage articles')) {
+
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to access this page.'
+            ], 403);
+
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $articles = Article::where('status', 'under_review')
+            ->with(['user:id,name', 'category:id,name', 'tags:id,name'])
+            ->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $articles,
+            'message' => 'Articles under review retrieved successfully.'
+        ], 200);
     }
 
     /**
@@ -40,7 +71,16 @@ class ArticleController extends Controller
             'user_id' => 'required|exists:users,id',
         ]);
 
+        $data['status'] = 'under_review';
+
         $article = Article::create($data);
+
+        ModerationHistory::create([
+            'moderator_id' => auth()->id(),
+            'user_id' => $article->user_id,
+            'action' => 'Article created and flagged for review',
+            'details' => "Article ID {$article->id} created and flagged for review.",
+        ]);
 
         event(new ArticleCreated($article));
 
@@ -52,6 +92,12 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
+        if ($article->status === 'under_review') {
+            if (!auth('api')->check() || !auth('api')->user()->can('manage articles')) {
+                return response()->json(['message' => 'Unauthorized - Insufficient Permissions'], 403);
+            }
+        }
+
         return $article->load('tags');
     }
 
@@ -165,4 +211,24 @@ class ArticleController extends Controller
 
         return response()->json(['message' => 'Tags successfully detached from the article.'], 200);
     }
+
+    public function getUserFavorites(Request $request){
+        $user = auth('api')->user();
+
+        if (!$user){
+            return response()->json([
+                'message' => 'Not Authenticated.'
+            ], 401);
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $favorites = $user->favoriteArticles()->with('tags')->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $favorites,
+            'message' => 'User favorites retrieved successfully'
+        ], 200);
+    }
+
 }

@@ -72,4 +72,16 @@ class User extends Authenticatable
     {
         return $this->hasMany(ReadingProgress::class);
     }
+
+    public function notifications(){
+        return $this->hasMany(Notification::class);
+    }
+
+    public function sanctions(){
+        return $this->hasMany(Sanction::class);
+    }
+
+    public function reports(){
+        return $this->hasMany(Report::class);
+    }
 }

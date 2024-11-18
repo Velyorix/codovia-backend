@@ -17,6 +17,7 @@ class Article extends Model
         'category_id',
         'user_id',
         'version',
+        'status'
     ];
 
     // Relation avec la catégorie

@@ -70,7 +70,7 @@ class CommentController extends Controller
             'per_page' => 'integer|min:1|max:100',
         ]);
 
-        $reports = Report::with('comment', 'user');
+        $reports = Report::with(['comment:id,name', 'user:id,name']);
 
         if ($request->has('status')) {
             $resolved = $request->status === 'resolved';
@@ -89,9 +89,8 @@ class CommentController extends Controller
         $reports->orderBy('created_at', $sortOrder);
 
         $perPage = $request->input('per_page', 10);
-        $paginatedReports = $reports->paginate($perPage);
 
-        return response()->json($paginatedReports);
+        return $reports->orderBy('created_at', $sortOrder)->paginate($perPage);
     }
 
     public function resolveReport($reportId){
@@ -108,5 +107,15 @@ class CommentController extends Controller
         } catch (ModelNotFoundException $e) {
             return response()->json(['message' => 'Report not found.'], 404);
         }
+    }
+
+    public function vote(Request $request, Comment $comment){
+        $request->validate([
+            'vote_type' => 'required|in:upvote,downvote'
+        ]);
+
+        $user = auth('api')->user();
+
+        return response()->json(['message' => 'Vote registered successfully.'], 200);
     }
 }

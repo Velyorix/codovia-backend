@@ -39,4 +39,18 @@ class ReadingProgressController extends Controller
 
         return response()->json($history, 200);
     }
+
+    public function resetProgress(Article $article){
+        $progress = ReadingProgress::where('user_id', auth()->id())
+        ->where('article_id', $article->id)
+        ->first();
+
+        if (!$progress){
+            return response()->json(['message' => 'Progress not found'], 404);
+        }
+
+        $progress->delete();
+
+        return response()->json(['message' => 'Progress reset successfully'], 200);
+    }
 }

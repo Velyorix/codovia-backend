@@ -36,4 +36,16 @@ class RatingController extends Controller{
         ], 200);
     }
 
+    public function deleteRating(Request $request, Article $article){
+        $user = auth()->user();
+
+        $rating = $article->ratings()->where('user_id', $user->id)->first();
+
+        if (!$rating){
+            return response()->json(['message' => 'Rating not found.']);
+        }
+
+        return response()->json(['message' => 'Rating deleted successfully.'], 200);
+    }
+
 }

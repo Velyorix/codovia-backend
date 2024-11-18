@@ -19,7 +19,12 @@ class FavoriteController extends Controller
             'user_id' => $user->id,
             'article_id' => $article->id,
         ]);
-        return response()->json(['message' => 'Article added to favorites successfully'], 201);
+
+        return response()->json([
+            'success' => true,
+            'data' => $favorite,
+            'message' => 'Article added to favorites successfully'
+        ], 201);
     }
 
     public function destroy(Request $request, Article $article){

@@ -22,9 +22,11 @@ class ArticleController extends Controller
     public function index(Request $request)
     {
         $perPage = $request->input('per_page', 10);
-        $query = Article::query()->where('status', 'public');
+        $articles = Article::where('status', 'public')
+            ->with(['user:id,name', 'category:id,name', 'tags:id,name'])
+            ->paginate($perPage);
 
-        return $query->paginate($perPage);
+        return response()->json($articles, 200);
     }
 
     /**
@@ -33,13 +35,24 @@ class ArticleController extends Controller
     public function listUnderReview(Request $request)
     {
         if (!auth('api')->check() || !auth('api')->user()->can('manage articles')) {
-            return response()->json(['message' => 'Unauthorized - Insufficient Permissions'], 403);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'You do not have permission to access this page.'
+            ], 403);
+
         }
 
         $perPage = $request->input('per_page', 10);
-        $query = Article::query()->where('status', 'under_review');
+        $articles = Article::where('status', 'under_review')
+            ->with(['user:id,name', 'category:id,name', 'tags:id,name'])
+            ->paginate($perPage);
 
-        return $query->paginate($perPage);
+        return response()->json([
+            'success' => true,
+            'data' => $articles,
+            'message' => 'Articles under review retrieved successfully.'
+        ], 200);
     }
 
     /**
@@ -198,4 +211,24 @@ class ArticleController extends Controller
 
         return response()->json(['message' => 'Tags successfully detached from the article.'], 200);
     }
+
+    public function getUserFavorites(Request $request){
+        $user = auth('api')->user();
+
+        if (!$user){
+            return response()->json([
+                'message' => 'Not Authenticated.'
+            ], 401);
+        }
+
+        $perPage = $request->input('per_page', 10);
+        $favorites = $user->favoriteArticles()->with('tags')->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $favorites,
+            'message' => 'User favorites retrieved successfully'
+        ], 200);
+    }
+
 }

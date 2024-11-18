@@ -78,4 +78,13 @@ class SanctionController extends Controller
 
         $user->update(['status' => $hasActiveBan ? 'banned' : 'active']);
     }
+
+    public function getActiveSanctions($userId){
+        $sanction = Sanction::where('user_id', $userId)
+            ->where(function ($query){
+               $query->whereNull('end_date')
+               ->orWhere('end_date', '>=', now());
+            })->get();
+        return response()->json(['data' => $sanction], 200);
+    }
 }

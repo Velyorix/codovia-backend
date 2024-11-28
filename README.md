@@ -1,6 +1,6 @@
-# TechPedia - Backend
+# Codovia - Backend
 
-Backend API for **TechPedia**, an open-source interactive wiki platform designed to centralize knowledge on web development technologies and modules. This backend, developed with PHP, provides RESTful API endpoints to manage content, users, and permissions. The project is licensed under the Apache License 2.0 and is designed to work seamlessly with the TechPedia frontend.
+Backend API for **Codovia**, an open-source interactive wiki platform designed to centralize knowledge on web development technologies and modules. This backend, developed with PHP, provides RESTful API endpoints to manage content, users, and permissions. The project is licensed under the Apache License 2.0 and is designed to work seamlessly with the Codovia frontend.
 
 ## Table of Contents
 
@@ -13,7 +13,7 @@ Backend API for **TechPedia**, an open-source interactive wiki platform designed
 
 ## Project Overview
 
-The backend of TechPedia handles the business logic and data management for:
+The backend of Codovia handles the business logic and data management for:
 - **User authentication and authorization**: Role-based access control for different user roles (admin, editor, registered user, visitor)
 - **CRUD operations for articles and categories**: Create, read, update, and delete articles and categories
 - **Markdown support** for articles with syntax highlighting
@@ -42,8 +42,8 @@ To set up the backend environment locally, follow these steps:
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/YuketsuSh/TechPedia-Backend.git
-   cd TechPedia-Backend
+   git clone https://github.com/YuketsuSh/codovia-backend.git
+   cd codovia-backend
    ```
 
 2. **Install dependencies**:
@@ -87,7 +87,7 @@ Configure your database connection in the `.env` file. Default settings are for 
 Passport is used for authentication. Ensure Passport is correctly configured and run `php artisan passport:install` to set up OAuth clients.
 
 ### Meilisearch Configuration
-TechPedia's search functionality is powered by Meilisearch. To enable Meilisearch, follow these steps:
+Codovia's search functionality is powered by Codovia. To enable Meilisearch, follow these steps:
 
 1. **Install and Run Meilisearch**: Install Meilisearch on your server or use a hosted instance.
 2. **Set Environment Variables**:

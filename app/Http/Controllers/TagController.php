@@ -25,13 +25,49 @@ class TagController extends Controller
 
     public function destroy(Tag $tag)
     {
-        if (Article::whereHas('tags', function ($query) use ($tag) {
-            $query->where('id', $tag->id);
-        })->exists()){
-            return response()->json(['message' => 'Cannot delete tag as it is used in article.'], 409);
+        try {
+            $exists = Article::whereHas('tags', function ($query) use ($tag) {
+                $query->where('tags.id', $tag->id);
+            })->exists();
+
+            if ($exists) {
+                return response()->json([
+                    'message' => 'Tag cannot be deleted as it is associated with one or more articles.'
+                ], 400);
+            }
+
+            $tag->delete();
+
+            return response()->json([
+                'message' => 'Tag deleted successfully.'
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while deleting the tag.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-        $tag->delete();
-        return response()->json(['message' => 'Tag deleted successfully.'], 204);
+    }
+
+    public function update(Request $request, Tag $tag)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255|unique:tags,name,' . $tag->id,
+        ]);
+
+        try {
+            $tag->update($data);
+
+            return response()->json([
+                'message' => 'Tag updated successfully.',
+                'tag' => $tag,
+            ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'message' => 'An error occurred while updating the tag.',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
 }

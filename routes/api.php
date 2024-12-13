@@ -82,6 +82,7 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::post('tags', [TagController::class, 'store'])->middleware(['can:manage tags']);
     Route::delete('tags/{tag}', [TagController::class, 'destroy'])->middleware(['can:manage tags']);
+    Route::put('tags/{tag}', [TagController::class, 'update'])->middleware(['can:manage tags']);
     Route::post('articles/{article}/tags', [ArticleController::class, 'attachTags'])->middleware(['can:manage tags']);
     Route::delete('articles/{article}/tags', [ArticleController::class, 'detachTags'])->middleware(['can:manage tags']);
 

@@ -23,7 +23,7 @@ class ArticleController extends Controller
     {
         $perPage = $request->input('per_page', 10);
         $articles = Article::where('status', 'public')
-            ->with(['user:id,name', 'category:id,name', 'tags:id,name'])
+            ->with(['user:id,name', 'category:id,name,parent_id', 'tags:id,name'])
             ->paginate($perPage);
 
         return response()->json($articles, 200);
@@ -92,13 +92,20 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        if ($article->status === 'under_review') {
-            if (!auth('api')->check() || !auth('api')->user()->can('manage articles')) {
-                return response()->json(['message' => 'Unauthorized - Insufficient Permissions'], 403);
-            }
+        // Si l'article est en révision, vérifier les permissions
+        if ($article->status === 'under_review' &&
+            (!auth('api')->check() || !auth('api')->user()->can('manage articles'))) {
+            return response()->json(['message' => 'Unauthorized - Insufficient Permissions'], 403);
         }
 
-        return $article->load('tags');
+        // Charger les relations nécessaires
+        $article->load([
+            'user:id,name',
+            'category:id,name,parent_id',
+            'tags:id,name',
+        ]);
+
+        return response()->json($article, 200);
     }
 
     /**

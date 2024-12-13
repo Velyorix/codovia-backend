@@ -8,6 +8,10 @@ use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+use Illuminate\Support\Str;
+
 
 class AuthController extends Controller
 {
@@ -40,6 +44,7 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'role' => 'user',
+            'avatar_url' => '/images/default-avatar.png'
         ]);
 
         $token = $user->createToken('authToken')->accessToken;
@@ -93,37 +98,96 @@ class AuthController extends Controller
         return response()->json(['message' => 'User not found.'], 404);
     }
 
-    public function sendPasswordResetLink(Request $request){
+    public function sendPasswordResetLink(Request $request)
+    {
         $request->validate(['email' => 'required|email']);
-        $status = Password::sendResetLink($request->only('email'));
 
-        return $status === Password::RESET_LINK_SENT
-            ? response()->json(['message' => 'Reset link sent to your email.'], 200)
-            : response()->json(['message' => 'Unable to send reset link.'], 500);
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'Email not found.'], 404);
+        }
+
+        $token = Str::random(60);
+
+        $user->update([
+            'password_reset_token' => Hash::make($token),
+        ]);
+
+        $resetLink = url("http://192.168.1.12:5173/reset-password/update?token={$token}&email={$user->email}");
+
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host = env('MAIL_HOST');
+            $mail->SMTPAuth = true;
+            $mail->Username = env('MAIL_USERNAME');
+            $mail->Password = env('MAIL_PASSWORD');
+            $mail->SMTPSecure = env('MAIL_ENCRYPTION');
+            $mail->Port = env('MAIL_PORT');
+
+            $mail->setFrom(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
+
+            $mail->addAddress($user->email);
+            $mail->CharSet = 'UTF-8';
+            $mail->Encoding = 'base64';
+
+            $mail->isHTML(true);
+            $mail->Subject = 'Réinitialisation de votre mot de passe';
+            $mail->Body = "
+    <div style='font-family: Arial, sans-serif; background-color: #111827; color: #d1d5db; padding: 20px; border-radius: 8px; max-width: 600px; margin: 0 auto;'>
+        <h2 style='color: #4f46e5; text-align: center;'>Réinitialisation de votre mot de passe</h2>
+        <p>Bonjour <strong>{$user->name}</strong>,</p>
+        <p>Vous avez demandé à réinitialiser votre mot de passe. Cliquez sur le bouton ci-dessous pour procéder :</p>
+        <div style='text-align: center; margin: 20px 0;'>
+            <a href='{$resetLink}'
+                style='background: linear-gradient(to right, #4f46e5, #3b82f6); color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px; display: inline-block;'
+                target='_blank'>
+                Réinitialiser mon mot de passe
+            </a>
+        </div>
+        <p style='font-size: 0.9rem;'>Si vous n'avez pas demandé cette réinitialisation, veuillez ignorer cet email.</p>
+        <hr style='border: 0; height: 1px; background: #374151; margin: 20px 0;'>
+        <footer style='text-align: center; font-size: 0.8rem; color: #9ca3af;'>
+            &copy; 2024 Codovia. Tous droits réservés.
+        </footer>
+    </div>
+";
+
+
+            $mail->send();
+
+            return response()->json(['message' => 'Reset link sent to your email.'], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => 'Unable to send reset link.', 'error' => $mail->ErrorInfo], 500);
+        }
     }
 
-    public function resetPassword(Request $request){
+    public function resetPassword(Request $request)
+    {
         $request->validate([
             'email' => 'required|email',
             'token' => 'required',
             'password' => 'required|min:8|confirmed',
         ]);
 
-        $status = Password::reset(
-            $request->only('email', 'password', 'password_confirmation', 'token'),
-            function ($user, $password) use ($request) {
-                $user->forceFill([
-                    'password' => Hash::make($password),
-                ])->save();
+        $user = User::where('email', $request->email)->first();
 
-                $user->tokens()->delete();
-                event(new PasswordReset($user));
-            }
-        );
+        if (!$user) {
+            return response()->json(['message' => 'Email not found.'], 404);
+        }
 
-        return $status === Password::PASSWORD_RESET
-            ? response()->json(['message' => 'Password reset successfully.'], 200)
-            : response()->json(['message' => 'Unable to reset password.'], 500);
+        if (!Hash::check($request->token, $user->password_reset_token)) {
+            return response()->json(['message' => 'Invalid token.'], 400);
+        }
+
+        $user->update([
+            'password' => Hash::make($request->password),
+            'password_reset_token' => null,
+        ]);
+
+        return response()->json(['message' => 'Password reset successfully.'], 200);
     }
 
     public function updateProfile(Request $request){

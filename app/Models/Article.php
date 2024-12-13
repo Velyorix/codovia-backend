@@ -23,7 +23,7 @@ class Article extends Model
     // Relation avec la catégorie
     public function category()
     {
-        return $this->belongsTo(Category::class);
+        return $this->belongsTo(Category::class)->with('parent');
     }
 
     // Relation avec l'utilisateur (auteur de l'article)
@@ -51,6 +51,7 @@ class Article extends Model
             'title' => $this->title,
             'content' => $this->content,
             'category_id' => $this->category_id,
+            'category' => $this->category?->name,
             'user_id' => $this->user_id,
             'created_at' => $this->created_at,
             'tags' => $this->tags->pluck('name')->toArray(),

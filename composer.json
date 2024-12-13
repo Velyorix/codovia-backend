@@ -12,6 +12,7 @@
         "laravel/scout": "^10.11",
         "laravel/tinker": "^2.9",
         "meilisearch/meilisearch-php": "^1.11",
+        "phpmailer/phpmailer": "^6.9",
         "psr/http-client": "^1.0",
         "spatie/laravel-permission": "^6.10"
     },

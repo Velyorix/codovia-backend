@@ -29,6 +29,7 @@ class User extends Authenticatable
         'status',
         'bio',
         'email_verified_at',
+        'password_reset_token',
     ];
 
     /**
@@ -39,6 +40,7 @@ class User extends Authenticatable
     protected $hidden = [
         'password',
         'remember_token',
+        'password_reset_token',
     ];
 
     /**

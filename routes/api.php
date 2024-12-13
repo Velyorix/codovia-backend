@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ArticleController;
 use App\Http\Controllers\ArticleReportController;
+use App\Http\Controllers\ArticleStatusController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\FavoriteController;
@@ -61,6 +62,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('reading-history', [ReadingProgressController::class, 'history']);
     Route::get('/articles/{article}/is-favorite', [FavoriteController::class, 'isFavorite']);
     Route::get('articles/{article}/tags', [ArticleController::class, 'listTags']);
+
+    Route::post('articles/{article}/accept', [ArticleStatusController::class, 'accept'])->middleware('can:manage articles');
+    Route::post('articles/{article}/reject', [ArticleStatusController::class, 'reject'])->middleware('can:manage articles');
 
     Route::delete('comments/{comment}', [CommentController::class, 'destroy'])->middleware('can:manage comments');
     Route::post('/comments/{comment}/report', [CommentController::class, 'report']);

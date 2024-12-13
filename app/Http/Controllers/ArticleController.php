@@ -12,6 +12,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use App\Models\Article;
 use App\Models\Notification;
+use PHPMailer\PHPMailer\PHPMailer;
 
 class ArticleController extends Controller
 {
@@ -81,6 +82,33 @@ class ArticleController extends Controller
             'action' => 'Article created and flagged for review',
             'details' => "Article ID {$article->id} created and flagged for review.",
         ]);
+
+        $author = User::find($article->user_id);
+        $author->notifications()->create([
+            'type' => 'article_status',
+            'message' => "Your article '{$article->title}' is under review.",
+            'data' => ['article_id' => $article->id],
+            'is_read' => false,
+        ]);
+
+        $this->sendEmail(
+            $author->email,
+            'Your Article is Under Review',
+            view('emails.article_under_review', ['article' => $article])->render()
+        );
+
+        $staffMembers = User::role('admin')->orWhereHas('permissions', function ($query) {
+            $query->where('name', 'manage articles');
+        })->get();
+
+        foreach ($staffMembers as $staff) {
+            $staff->notifications()->create([
+                'type' => 'new_article_review',
+                'message' => "A new article '{$article->title}' is awaiting review.",
+                'data' => ['article_id' => $article->id],
+                'is_read' => false,
+            ]);
+        }
 
         event(new ArticleCreated($article));
 
@@ -236,6 +264,35 @@ class ArticleController extends Controller
             'data' => $favorites,
             'message' => 'User favorites retrieved successfully'
         ], 200);
+    }
+
+    /**
+     * Send email using PHPMailer.
+     */
+    private function sendEmail($recipient, $subject, $body)
+    {
+        $mail = new PHPMailer(true);
+
+        try {
+            $mail->isSMTP();
+            $mail->Host = env('MAIL_HOST');
+            $mail->SMTPAuth = true;
+            $mail->Username = env('MAIL_USERNAME');
+            $mail->Password = env('MAIL_PASSWORD');
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+            $mail->Port = env('MAIL_PORT');
+
+            $mail->setFrom(env('MAIL_FROM_ADDRESS'), env('MAIL_FROM_NAME'));
+            $mail->addAddress($recipient);
+
+            $mail->isHTML(true);
+            $mail->Subject = $subject;
+            $mail->Body = $body;
+
+            $mail->send();
+        } catch (Exception $e) {
+            logger("PHPMailer Error: " . $mail->ErrorInfo);
+        }
     }
 
 }

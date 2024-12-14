@@ -71,6 +71,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/comments/{comment}/reports', [CommentController::class, 'getReports']);
     Route::get('/admin/reports', [CommentController::class, 'reviewReports'])->middleware('can:manage reports');
     Route::post('/admin/reports/{report}/resolve', [CommentController::class, 'resolveReport'])->middleware('can:manage reports');
+    Route::get('/admin/articles', [ArticleController::class, 'showAllArticles'])->middleware('can:manage articles');
 
     Route::post('categories', [CategoryController::class, 'store'])->middleware('can:manage categories');
     Route::put('categories/{category}', [CategoryController::class, 'update'])->middleware('can:manage categories');

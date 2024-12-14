@@ -13,6 +13,7 @@ use Illuminate\Http\Request;
 use App\Models\Article;
 use App\Models\Notification;
 use PHPMailer\PHPMailer\PHPMailer;
+use Spatie\Permission\Models\Permission;
 
 class ArticleController extends Controller
 {
@@ -29,6 +30,23 @@ class ArticleController extends Controller
 
         return response()->json($articles, 200);
     }
+
+    /**
+     * Display a listing of all resources with pagination.
+     */
+    public function showAllArticles(Request $request)
+    {
+        $perPage = $request->input('per_page', 10);
+        $articles = Article::with(['user:id,name', 'category:id,name,parent_id', 'tags:id,name'])
+            ->paginate($perPage);
+
+        return response()->json([
+            'success' => true,
+            'data' => $articles,
+            'message' => 'All articles retrieved successfully.',
+        ], 200);
+    }
+
 
     /**
      * Display a listing of the review resource.
@@ -120,9 +138,12 @@ class ArticleController extends Controller
      */
     public function show(Article $article)
     {
-        // Si l'article est en révision, vérifier les permissions
+
+        $permission = Permission::where('name', 'manage articles')->first();
+        $user = auth('api')->user();
+
         if ($article->status === 'under_review' &&
-            (!auth('api')->check() || !auth('api')->user()->can('manage articles'))) {
+            (!$user->hasPermissionTo($permission))) {
             return response()->json(['message' => 'Unauthorized - Insufficient Permissions'], 403);
         }
 
@@ -139,29 +160,48 @@ class ArticleController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Article $article){
-        if (!auth()->user()->can('manage articles')) {
-            return response()->json(['message' => 'Unauthorized'], 403);
+    public function update(Request $request, Article $article)
+    {
+        $data = $request->validate([
+            'title' => 'nullable|string|max:255',
+            'content' => 'nullable|string',
+            'status' => 'nullable|string|in:public,under_review,rejected',
+            'category_id' => 'nullable|exists:categories,id',
+            'tags' => 'nullable|array',
+            'tags.*' => 'exists:tags,id',
+        ]);
+
+        if (array_key_exists('content', $data) && $data['content'] !== $article->content) {
+            ArticleVersion::create([
+                'article_id' => $article->id,
+                'content' => $article->content,
+                'version' => $article->versions()->count() + 1,
+            ]);
         }
 
-        $data = $request->validate([
-            'title' => 'string|max:255',
-            'content' => 'string',
-            'category_id' => 'exists:categories,id',
-        ]);
+        $article->fill($data);
+        $isUpdated = $article->isDirty() ? $article->save() : false;
 
-        ArticleVersion::create([
-            'article_id' => $article->id,
-            'content' => $article->content,
-            'version' => $article->versions()->count() + 1,
-        ]);
+        if (!$isUpdated) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No changes were made to the article.',
+            ], 200);
+        }
 
-        $article->update($data);
+        if ($request->has('tags')) {
+            $article->tags()->sync($data['tags']);
+        }
 
         event(new ArticleUpdated($article));
 
-        return response()->json($article, 200);
+        return response()->json([
+            'success' => true,
+            'message' => 'Article updated successfully.',
+            'data' => $article,
+        ], 200);
     }
+
 
     /**
      * Display the version history of an article.
